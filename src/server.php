@@ -30,33 +30,39 @@ while (true) {
 
      $clientKey = "$client_ip:$client_port";
     $mesazhi = explode("; ", $buffer);
-    
-    // Kontrollon nëse klienti është i lidhur tashmë ose nëse kemi arritur numrin maksimal të klientëve
-    if (!isset( $connectedClients[$clientKey]) && count($connectedClients) >= $maxClients) {
-        echo "Numri maksimal i klientëve u arrit, refuzohet lidhja nga $client_ip:$client_port\n";
-        continue;
-    }
 
-    // Shton klientin në listën e klientëve të lidhur nëse nuk është tashmë i regjistruar
-    if (!isset( $connectedClients[$clientKey])) {
-          $connectedClients[$clientKey] = [
-                'username' => $mesazhi[0],
-                'password' => $mesazhi[1],
-                'timeout' => $tiemout,
-                'isAdmin' => ($mesazhi[1] == $adminPassword)
-            ];
-        echo "Klienti $client_ip:$client_port u lidh\n";
+     if (count($connectedClients) >= $maxClients) {
+        echo "Numri maksimal i klientëve u arrit, nuk mund të lidheni tani\n";
+        continue;
+    } else {
+        if (!isset($connectedClients[$clientKey])) {
+            if (isset($removedClients[$clientKey])) {
+                $connectedClients[$clientKey] = $removedClients[$clientKey]; 
+                unset($removedClients[$clientKey]);
+                echo "Klienti $client_ip:$client_port u rikthye dhe u rinovua me të dhënat e mëparshme\n";
+            } else {
+                $connectedClients[$clientKey] = [
+                    'username' => $mesazhi[0],
+                    'password' => $mesazhi[1],
+                    'lastActivity' => time(),
+                    'isAdmin' => ($mesazhi[1] == $adminPassword)
+                ];
+                echo "Klienti $client_ip:$client_port u lidh\n";
+            }
+        } else {
+            $connectedClients[$clientKey]['lastActivity'] = time();
+        }
     }
 
     foreach ($connectedClients as $key => $client) {
-        if ($key !== $clientKey) {
-            if ($client['timeout'] > 0) {
-                $clients[$key]['timeout']--;
-            } else {
-                unset($clients[$key]); // Fshij klientin
-            }
+        if (time() - $client['lastActivity'] > $timeout) {
+            
+            echo "Klienti $key ka kaluar kohën e pritjes, po largohet...\n";
+            $removedClients[$key] = $client;  
+            unset($connectedClients[$key]);  
         }
     }
+    
 
      // Logon kërkesën me timestamp dhe IP-në e klientit për auditim
     $timestamp = date('Y-m-d H:i:s');
