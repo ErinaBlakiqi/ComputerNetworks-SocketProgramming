@@ -38,6 +38,16 @@ while (true) {
         echo "Klienti $client_ip:$client_port u lidh\n";
     }
 
+    foreach ($clients as $key => $client) {
+        if ($key !== $clientKey) {
+            if ($client['timeout'] > 0) {
+                $clients[$key]['timeout']--;
+            } else {
+                unset($clients[$key]); // Fshij klientin
+            }
+        }
+    }
+
      // Logon kërkesën me timestamp dhe IP-në e klientit për auditim
     $timestamp = date('Y-m-d H:i:s');
     $logEntry = "[$timestamp] Kërkesë nga $client_ip:$client_port - Mesazh: $buffer\n";
