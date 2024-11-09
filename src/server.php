@@ -97,9 +97,12 @@ while (true) {
         }
     } elseif ($command === 'execute') {
         if ($connectedClients[$clientKey]['isAdmin']) {
-            $escapedCommand = escapeshellcmd($file);
-            $output = shell_exec($escapedCommand);
-            $response = $output ?: "Komanda u ekzekutua, por pa ndonjë rezultat.";
+           // $escapedCommand = escapeshellcmd($file);
+            //$output = shell_exec($escapedCommand);
+            //$response = $output ?: "Komanda u ekzekutua, por pa ndonjë rezultat.";
+
+     $filePath = __DIR__ . '/' . $file;
+    $response = file_exists($filePath) ? (unlink($filePath) ? "Skedari '$file' u fshi me sukses." : "Ndodhi një gabim gjatë përpjekjes për të fshirë skedarin '$file'."): "Skedari '$file' nuk ekziston.";
         } else {
             $response = "Nuk keni privilegje për të ekzekutuar komanda";
         }
