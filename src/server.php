@@ -9,31 +9,34 @@ $requestLogFile="log.txt";
 $timeout = 50;
 $adminPassword="123";
 
+// Krijimi i socket-it UDP
 $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 
 if (!$socket) {
-    die("Couldn't create socket: " . socket_strerror(socket_last_error()));
+    die("Nuk u krijua socket-i: " . socket_strerror(socket_last_error()));
 }
 
+// Lidhet me IP dhe portin e përcaktuar për të pritur kërkesat e klientëve
 if (!socket_bind($socket, $server_ip, $server_port)) {
-    die("Couldn't bind socket: " . socket_strerror(socket_last_error()));
+    die("Nuk u realizua lidhja me socket-in: " . socket_strerror(socket_last_error()));
 }
 echo "Serveri UDP është në gjendje dëgjimi në $server_ip:$server_port\n";
 
 while (true) {
-    // Prit mesazhe nga klientët
+    
     $buffer = '';
     $client_ip = '';
     $client_port = 0;
    
-    // Pranon një mesazh nga një klient
+   // Merr një mesazh nga klienti dhe ruan IP-në dhe portin e tij
     socket_recvfrom($socket, $buffer, 1024, 0, $client_ip, $client_port);
 
     $clientKey = "$client_ip:$client_port";
     $mesazhi = explode("|", $buffer);
 
+    // Kontrollon nëse numri i klientëve të lidhur ka arritur maksimumin
      if (count($connectedClients) >= $maxClients) {
-        echo "Numri maksimal i klientëve u arrit, nuk mund të lidheni tani\n";
+        echo "Numri maksimal i klientëve u arrit, nuk mund të lidheni tani.\n";
         continue;
     } else {
         if (!isset($connectedClients[$clientKey])) {
@@ -64,13 +67,12 @@ while (true) {
         }
     }
     
-     // Logon kërkesën me timestamp dhe IP-në e klientit për auditim
+// Logon kërkesën me timestamp dhe IP-në e klientit për auditim
     $timestamp = date('Y-m-d H:i:s');
     $logEntry = "[$timestamp] Kërkesë nga $client_ip:$client_port - Mesazh: $buffer\n";
     file_put_contents($requestLogFile, $logEntry, FILE_APPEND);
-// buffer admin123|write|teksti.txt|tekst 
-   // mesazhi={amin123,write,tekst....}
-    // Përpunon mesazhin e klientit
+
+    // Ndërveprimi me komandat e klientit bazuar në mesazhin e marrë
     echo "Mesazh i marrë nga $client_ip:$client_port - $buffer\n";
 
     $command = $mesazhi[1];
@@ -113,6 +115,7 @@ while (true) {
     // Dërgon përgjigjen te klienti
     socket_sendto($socket, $response, strlen($response), 0, $client_ip, $client_port);
 }
-      socket_close($socket);
+    // Mbyll socket-in
+    socket_close($socket);
 
 ?>
