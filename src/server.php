@@ -4,6 +4,7 @@ $server_ip = "0.0.0.0";
 $server_port = 1200;
 $maxClients=4;
 $connectedClients=[];
+$removedClients = [];
 $requestLogFile="log.txt";
 $timeout = 50;
 $adminPassword="123";
