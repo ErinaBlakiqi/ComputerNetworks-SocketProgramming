@@ -6,6 +6,7 @@ $maxClients=4;
 $connectedClients=[];
 $requestLogFile="log.txt";
 $timeout = 50;
+$adminPassword="123";
 
 $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 
