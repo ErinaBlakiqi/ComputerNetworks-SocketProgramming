@@ -5,6 +5,7 @@ $server_port = 1200;
 $maxClients=4;
 $connectedClients=[];
 $requestLogFile="log.txt";
+$timeout = 50;
 
 $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 
@@ -22,10 +23,13 @@ while (true) {
     $buffer = '';
     $client_ip = '';
     $client_port = 0;
-    
+   
     // Pranon një mesazh nga një klient
     socket_recvfrom($socket, $buffer, 1024, 0, $client_ip, $client_port);
 
+     $clientKey = "$client_ip:$client_port";
+    $mesazhi = explode("; ", $buffer);
+    
     // Kontrollon nëse klienti është i lidhur tashmë ose nëse kemi arritur numrin maksimal të klientëve
     if (!in_array($client_ip, $connectedClients) && count($connectedClients) >= $maxClients) {
         echo "Numri maksimal i klientëve u arrit, refuzohet lidhja nga $client_ip:$client_port\n";
@@ -34,11 +38,16 @@ while (true) {
 
     // Shton klientin në listën e klientëve të lidhur nëse nuk është tashmë i regjistruar
     if (!in_array($client_ip, $connectedClients)) {
-        $connectedClients[] = $client_ip;
+          $connectedClients[$clientKey] = [
+                'username' => $mesazhi[0],
+                'password' => $mesazhi[1],
+                'timeout' => $tiemout,
+                'isAdmin' => ($mesazhi[1] == $adminPassword)
+            ];
         echo "Klienti $client_ip:$client_port u lidh\n";
     }
 
-    foreach ($clients as $key => $client) {
+    foreach ($connectedClients as $key => $client) {
         if ($key !== $clientKey) {
             if ($client['timeout'] > 0) {
                 $clients[$key]['timeout']--;
