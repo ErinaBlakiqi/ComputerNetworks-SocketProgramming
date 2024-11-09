@@ -31,13 +31,13 @@ while (true) {
     $mesazhi = explode("; ", $buffer);
     
     // Kontrollon nëse klienti është i lidhur tashmë ose nëse kemi arritur numrin maksimal të klientëve
-    if (!in_array($client_ip, $connectedClients) && count($connectedClients) >= $maxClients) {
+    if (!isset( $connectedClients[$clientKey]) && count($connectedClients) >= $maxClients) {
         echo "Numri maksimal i klientëve u arrit, refuzohet lidhja nga $client_ip:$client_port\n";
         continue;
     }
 
     // Shton klientin në listën e klientëve të lidhur nëse nuk është tashmë i regjistruar
-    if (!in_array($client_ip, $connectedClients)) {
+    if (!isset( $connectedClients[$clientKey])) {
           $connectedClients[$clientKey] = [
                 'username' => $mesazhi[0],
                 'password' => $mesazhi[1],
