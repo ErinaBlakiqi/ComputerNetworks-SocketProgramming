@@ -1,28 +1,47 @@
 <?php
-// server details
-$server_ip = "localhost";
-$server_port = 1200;
+$server_ip = '0.0.0.0'; 
+$server_port = 1200;      
 
-// Krijo UDP socket
-$socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+// Create the client socket
+$client_socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+if (!$client_socket) {
+    die("Couldn't create socket: " . socket_strerror(socket_last_error()));
+}
 
+echo "Socket created. Connecting to server at $server_ip:$server_port\n";
+
+// Set authentication credentials
+$password = readline("Enter password for access level (for admin privileges, enter the admin password): ");
+
+// Define a loop to interact with the server
 while (true) {
-    // Merr mesazh nga perdoruesi
-    echo "Enter message to send to server (or 'exit' to quit): ";
-    $input = trim(fgets(STDIN));
+    echo "\nAvailable Commands: read, write, execute, exit\n";
+    $command = readline("Enter command: ");
 
-    // Dergon message ne server
-    socket_sendto($socket, $input, strlen($input), 0, $server_ip, $server_port);
-
-    // Qysh do qe e shkrun so case sensitive
-    if (strtolower($input) == "exit") {
+    if ($command == "exit") {
         break;
     }
 
-    // Merr pergjigjen nga serveri
-    socket_recvfrom($socket, $buffer, 2048, 0, $server_ip, $server_port);
-    echo "Response from server: $buffer\n";
+    $file = readline("Enter the file name or command: ");
+    $content = "";
+
+    if ($command === "write") {
+        $content = readline("Enter content to write: ");
+    }
+
+    // Create message in format: "password|command|file|content"
+    $message = "$password|$command|$file|$content";
+
+    // Send the request to the server
+    socket_sendto($client_socket, $message, strlen($message), 0, $server_ip, $server_port);
+
+    // Receive the response from the server
+    $response = '';
+    socket_recvfrom($client_socket, $response, 1024, 0, $server_ip, $server_port);
+    echo "Server response: $response\n";
 }
 
-socket_close($socket);
+// Close the socket
+socket_close($client_socket);
+echo "Disconnected from server.\n";
 ?>
