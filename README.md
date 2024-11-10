@@ -1,6 +1,7 @@
 # UDP Socket Programming in PHP
 
 This project was created as part of the **Computer Networks** course.
+
 This project demonstrates a UDP socket server and client system in PHP. The server listens for incoming client requests, processes commands (like read, write, and execute), and responds accordingly. The client connects to the server, sends commands, and receives responses. The server handles up to a specified maximum number of clients and includes timeout functionality to disconnect inactive clients.
 
 ## Features
