@@ -1,5 +1,5 @@
 <?php
-//Vendosja e variablave për IP adresën dhe portin
+//Setting variables for the IP address and port
 $server_ip = '127.0.0.1';
 $server_port = 1200;
 $maxClients = 4;
@@ -18,25 +18,25 @@ if (!$socket) {
 if (!socket_bind($socket, $server_ip, $server_port)) {
     die("Couldn't bind socket: " . socket_strerror(socket_last_error()));
 }
-echo "Serveri UDP është në gjendje dëgjimi në $server_ip:$server_port\n";
+echo "The UDP server is listening on $server_ip:$server_port\n";
 
 $adminRequests = [];   // Queue for admin requests
 $regularRequests = []; // Queue for regular requests
 
 while (true) {
-    // Prit mesazhe nga klientët
+    // Wait for the messages from clients
     $buffer = '';
     $client_ip = '';
     $client_port = 0;
    
-    // Pranon një mesazh nga një klient
+    // Receive messages from clients
     socket_recvfrom($socket, $buffer, 1024, 0, $client_ip, $client_port);
 
     $clientKey = "$client_ip:$client_port";
     $mesazhi = explode("|", $buffer);
 
     if (count($connectedClients) >= $maxClients) {
-        echo "Numri maksimal i klientëve u arrit, nuk mund të lidheni tani\n";
+        echo "The maximum number of clients has been reached; unable to connect.\n";
         continue;
     } else {
         if (!isset($connectedClients[$clientKey])) {
@@ -44,14 +44,14 @@ while (true) {
                 $connectedClients[$clientKey] = $removedClients[$clientKey]; 
                 $connectedClients[$clientKey]['lastActivity'] = time();
                 unset($removedClients[$clientKey]);
-                echo "Klienti $client_ip:$client_port u rikthye dhe u rinovua me të dhënat e mëparshme\n";
+                echo "The client $client_ip:$client_port reconnected and was restored with previous data\n";
             } else {
                 $connectedClients[$clientKey] = [
                     'password' => $mesazhi[0],
                     'lastActivity' => time(),
                     'isAdmin' => ($mesazhi[0] == $adminPassword)
                 ];
-                echo "Klienti $client_ip:$client_port u lidh\n";
+                echo "The client $client_ip:$client_port has connected\n";
             }
         } else {
             $connectedClients[$clientKey]['lastActivity'] = time();
@@ -62,7 +62,7 @@ while (true) {
         if (time() - $client['lastActivity'] > $timeout) {
             $response = "Tour time is up. Exiting...\n";
             socket_sendto($socket, $response, strlen($response), 0, $client['client_ip'], $client['client_port']);
-            echo "Klienti $key ka kaluar kohën e pritjes, po largohet...\n";
+            echo "The client $key has exceeded the timeout, disconnecting...\n";
             $removedClients[$key] = $client;  
             unset($connectedClients[$key]);  
         }
@@ -84,14 +84,14 @@ while (true) {
         $regularRequests[] = $request;
     }
     
-     // Logon kërkesën me timestamp dhe IP-në e klientit për auditim
+     // Logs the request with a timestamp and the client's IP for auditing.
     $timestamp = date('Y-m-d H:i:s');
-    $logEntry = "[$timestamp] Kërkesë nga $client_ip:$client_port - Mesazh: $buffer\n";
+    $logEntry = "[$timestamp] Request from $client_ip:$client_port - Message: $buffer\n";
     file_put_contents($requestLogFile, $logEntry, FILE_APPEND);
     // buffer admin123|write|teksti.txt|tekst 
-    // mesazhi={amin123,write,tekst....}
-    // Përpunon mesazhin e klientit
-    echo "Mesazh i marrë nga $client_ip:$client_port - $buffer\n";
+    // message={amin123,write,tekst....}
+    // Processes the client's message.
+    echo "Message received from $client_ip:$client_port - $buffer\n";
 
      // Process admin requests first
      if (!empty($adminRequests)) {
@@ -115,22 +115,22 @@ while (true) {
     if ($command === 'write') {
         if ($connectedClients[$clientKey]['isAdmin']) {
             if ($file === 'log.txt') {
-                $response = "Nuk mund të shkruani në log.txt";
+                $response = "You cannot write to log.txt";
             } else {
                 file_put_contents(__DIR__ . '/' . $file, "\n$content", FILE_APPEND);
-                $response = "Shkrimi në fajll u bë me sukses";
+                $response = "Writing to the file was successful";
             }
         } else {
-            $response = "Nuk keni privilegje për të shkruar";
+            $response = "You do not have permission to write";
         }
     } elseif ($command === 'read') {
         // Check if the file requested is 'log.txt'
         if ($file === 'log.txt') {
-            $response = "Nuk mund të lexoni nga log.txt";
+            $response = "You cannot read from log.txt";
         } else {
             $filePath = __DIR__ . '/' . $file;
             // Check if the file exists, otherwise return an error message
-            $response = file_exists($filePath) ? file_get_contents($filePath) : "Fajlli nuk u gjet";
+            $response = file_exists($filePath) ? file_get_contents($filePath) : "File not found";
         }
     } elseif ($command === 'execute') {
         if ($connectedClients[$clientKey]['isAdmin']) {
@@ -140,12 +140,12 @@ while (true) {
     
             // Check the output of the command execution
             if ($output === null) {
-                $response = "Komanda u ekzekutua, por pa ndonjë rezultat.";
+                $response = "The command was executed, but with no result.";
             } else {
-                $response = "Rezultati i komandës:\n" . $output;
+                $response = "Command result:\n" . $output;
             }
         } else {
-            $response = "Nuk keni privilegje për të ekzekutuar komanda";
+            $response = "You do not have permission to execute the command.";
         }
     }
     
