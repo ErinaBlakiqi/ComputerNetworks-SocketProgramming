@@ -1,5 +1,5 @@
 <?php
-$server_ip = '0.0.0.0'; 
+$server_ip = '127.0.0.1';
 $server_port = 1200;      
 
 // Create the client socket
@@ -33,14 +33,26 @@ while (true) {
     $message = "$password|$command|$file|$content";
 
     // Send the request to the server
-    socket_sendto($client_socket, $message, strlen($message), 0, $server_ip, $server_port);
+    $bytes_sent = socket_sendto($client_socket, $message, strlen($message), 0, $server_ip, $server_port);
+    if ($bytes_sent === false) {
+        echo "Error sending message to server: " . socket_strerror(socket_last_error()) . "\n";
+        continue;
+    }
 
     // Receive the response from the server
     $response = '';
-    socket_recvfrom($client_socket, $response, 1024, 0, $server_ip, $server_port);
+    $bytes_received = socket_recvfrom($client_socket, $response, 2048, 0, $server_ip, $server_port);
+    if ($bytes_received === false) {
+        echo "Error receiving response from server: " . socket_strerror(socket_last_error()) . "\n";
+        continue;
+    }
     echo "Server response: $response\n";
-}
 
+    // Exit if the response indicates timeout or disconnection
+    if (strpos($response, "Exiting...") !== false) {
+    break; // Exit the loop if "Exiting..." is in the response
+}
+}
 // Close the socket
 socket_close($client_socket);
 echo "Disconnected from server.\n";
