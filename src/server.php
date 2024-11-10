@@ -124,8 +124,14 @@ while (true) {
             $response = "Nuk keni privilegje për të shkruar";
         }
     } elseif ($command === 'read') {
-        $filePath = __DIR__ . '/' . $file;
-        $response = file_exists($filePath) ? file_get_contents($filePath) : "Fajlli nuk u gjet";
+        // Check if the file requested is 'log.txt'
+        if ($file === 'log.txt') {
+            $response = "Nuk mund të lexoni nga log.txt";
+        } else {
+            $filePath = __DIR__ . '/' . $file;
+            // Check if the file exists, otherwise return an error message
+            $response = file_exists($filePath) ? file_get_contents($filePath) : "Fajlli nuk u gjet";
+        }
     } elseif ($command === 'execute') {
         if ($connectedClients[$clientKey]['isAdmin']) {
             // Execute the specified command
