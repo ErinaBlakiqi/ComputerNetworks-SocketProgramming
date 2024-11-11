@@ -1,5 +1,5 @@
 <?php
-$server_ip = '127.0.0.1';
+$server_ip = '192.168.200.150';
 $server_port = 1200;
 
 // Create the client socket

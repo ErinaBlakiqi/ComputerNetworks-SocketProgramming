@@ -2,3 +2,9 @@
 [2024-11-10 21:02:34] Request from 127.0.0.1:57051 - Message: 123|read|log.txt|
 [2024-11-10 21:02:44] Request from 127.0.0.1:57051 - Message: 123|read|text1.txt|
 [2024-11-10 21:02:58] Request from 127.0.0.1:57051 - Message: 123|write|log.txt|r
+[2024-11-14 16:45:29] Request from 192.168.200.66:51607 - Message: 123|write|log.txt|erza
+[2024-11-14 16:46:36] Request from 192.168.200.66:59153 - Message: 123|write|log.txt|erza2
+[2024-11-14 16:47:04] Request from 192.168.200.66:51607 - Message: 123|execute|whoami|
+[2024-11-14 16:47:17] Request from 192.168.200.66:51607 - Message: 123|execute|dir|
+[2024-11-14 17:35:13] Request from 192.168.200.150:51316 - Message: 222|write|erina|erina
+[2024-11-14 17:35:44] Request from 192.168.200.150:51317 - Message: 123|execute|dir|

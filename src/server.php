@@ -1,6 +1,6 @@
 <?php
 // Server settings
-$server_ip = '127.0.0.1';
+$server_ip = '192.168.200.150';
 $server_port = 1200;
 $maxClients = 4;
 $connectedClients = [];
@@ -49,6 +49,10 @@ while (true) {
 
     $clientKey = "$client_ip:$client_port";
     $mesazhi = explode("|", $buffer);
+
+    if (isset($connectedClients[$clientKey])) {
+        $connectedClients[$clientKey]['lastActivity'] = time(); // Përditëson kohën e fundit të aktivitetit
+    }
 
  // Check if the maximum number of clients has been reached
  if (count($connectedClients) >= $maxClients && !isset($connectedClients[$clientKey])) {
